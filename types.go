@@ -5,5 +5,7 @@ import (
 )
 
 type (
-	Handler = types.Handler
+	Error        = types.Error
+	Handler      = types.Handler
+	HandlerError = types.HandlerError
 )
