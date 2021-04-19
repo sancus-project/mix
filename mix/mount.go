@@ -1,8 +1,8 @@
 package mix
 
 import (
-	"go.sancus.dev/mix/types"
+	"net/http"
 )
 
-func (m *Mixer) Mount(pattern string, router types.Router) {
+func (m *Mixer) Mount(pattern string, handler http.Handler) {
 }

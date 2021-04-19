@@ -4,14 +4,10 @@ import (
 	"net/http"
 )
 
-type Router interface {
-	http.Handler
-}
-
 type Mixer interface {
-	Router
+	http.Handler
 
-	Mount(string, Router)
+	Mount(string, http.Handler)
 
 	Close() error
 	Reload() error
