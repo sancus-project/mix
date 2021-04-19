@@ -5,6 +5,8 @@ import (
 )
 
 type Mixer struct {
+	Router
+
 	config MixerConfig
 }
 

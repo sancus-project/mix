@@ -30,6 +30,8 @@ func (opt mixerOption) ApplyOption(m *Mixer) error {
 
 // Defaults
 func (m *Mixer) SetDefaults() error {
+	m.Router.mixer = m
+
 	m.SetErrorHandler(m.config.ErrorHandler)
 	return nil
 }

@@ -5,6 +5,8 @@ import (
 )
 
 type (
-	Context = chi.Context
-	Routes  = chi.Routes
+	Context     = chi.Context
+	Route       = chi.Route
+	Routes      = chi.Routes
+	Middlewares = chi.Middlewares
 )
