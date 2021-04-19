@@ -11,4 +11,6 @@ type Router interface {
 type Mixer interface {
 	Router
 	Mount(string, Router)
+
+	Sitemap(prefix string) http.HandlerFunc
 }
