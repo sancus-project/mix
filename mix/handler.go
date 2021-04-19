@@ -12,10 +12,6 @@ func (m *Mixer) Handler(w http.ResponseWriter, r *http.Request) error {
 
 func (m *Mixer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err := m.Handler(w, r); err != nil {
-		m.HandleError(w, r, err)
+		m.config.ErrorHandler(w, r, err)
 	}
-}
-
-func (m *Mixer) HandleError(w http.ResponseWriter, r *http.Request, err error) {
-	panic(err)
 }
