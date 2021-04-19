@@ -29,6 +29,10 @@ func DefaultErrorHandler(w http.ResponseWriter, r *http.Request, err error) {
 	h.ServeHTTP(w, r)
 }
 
+func (m *Mixer) NotFound(w http.ResponseWriter, r *http.Request) {
+	m.config.ErrorHandler(w, r, types.ErrNotFound)
+}
+
 func (m *Mixer) SetErrorHandler(f types.ErrorHandler) error {
 	if f == nil {
 		f = DefaultErrorHandler
