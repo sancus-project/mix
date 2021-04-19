@@ -28,3 +28,17 @@ func DefaultErrorHandler(w http.ResponseWriter, r *http.Request, err error) {
 
 	h.ServeHTTP(w, r)
 }
+
+func (m *Mixer) SetErrorHandler(f types.ErrorHandler) error {
+	if f == nil {
+		f = DefaultErrorHandler
+	}
+	m.config.ErrorHandler = f
+	return nil
+}
+
+func SetErrorHandler(f types.ErrorHandler) MixerOption {
+	return MixerOptionFunc(func(m *Mixer) error {
+		return m.SetErrorHandler(f)
+	})
+}

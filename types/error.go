@@ -9,6 +9,8 @@ var (
 	ErrNotFound = &HandlerError{Code: http.StatusNotFound}
 )
 
+type ErrorHandler func(http.ResponseWriter, *http.Request, error)
+
 // Error including HTTP Status and an optional wrapped error
 type Error interface {
 	Error() string

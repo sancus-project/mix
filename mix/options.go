@@ -1,21 +1,35 @@
 package mix
 
 import (
-	"net/http"
+	"go.sancus.dev/mix/types"
 )
 
+// Config
 type MixerConfig struct {
-	ErrorHandler func(w http.ResponseWriter, r *http.Request, err error)
+	ErrorHandler types.ErrorHandler
 }
 
+// Options
 type MixerOption interface {
 	ApplyOption(m *Mixer) error
 }
 
+type MixerOptionApplier func(*Mixer) error
+
+func MixerOptionFunc(f MixerOptionApplier) MixerOption {
+	return &mixerOption{apply: f}
+}
+
+type mixerOption struct {
+	apply MixerOptionApplier
+}
+
+func (opt mixerOption) ApplyOption(m *Mixer) error {
+	return opt.apply(m)
+}
+
+// Defaults
 func (m *Mixer) SetDefaults() error {
-	cfg := &m.config
-	if cfg.ErrorHandler == nil {
-		cfg.ErrorHandler = DefaultErrorHandler
-	}
+	m.SetErrorHandler(m.config.ErrorHandler)
 	return nil
 }
