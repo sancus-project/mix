@@ -3,7 +3,7 @@ package mix
 import (
 	"net/http"
 
-	"go.sancus.dev/mix/types"
+	"go.sancus.dev/mix/errors"
 )
 
 func (m *Mixer) Sitemap(prefix string) http.HandlerFunc {
@@ -15,5 +15,5 @@ func (m *Mixer) Sitemap(prefix string) http.HandlerFunc {
 }
 
 func (m *Mixer) SitemapHandler(w http.ResponseWriter, r *http.Request, prefix string) error {
-	return types.ErrNotFound
+	return errors.ErrNotFound
 }

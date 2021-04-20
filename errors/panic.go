@@ -1,4 +1,4 @@
-package types
+package errors
 
 import (
 	"bytes"
@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"runtime/debug"
 	"strings"
+
+	"go.sancus.dev/mix/types"
 )
 
 type PanicError struct {
@@ -63,7 +65,7 @@ func (p PanicError) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 // backtrace based on github.com/go-chi/middleware/recoverer
-func NewPanicError(rvr interface{}) Error {
+func NewPanicError(rvr interface{}) types.Error {
 	// process debug stack info
 	stack := strings.Split(string(debug.Stack()), "\n")
 	lines := []string{}

@@ -3,11 +3,11 @@ package mix
 import (
 	"net/http"
 
-	"go.sancus.dev/mix/types"
+	"go.sancus.dev/mix/errors"
 )
 
 func (m *Mixer) Handler(w http.ResponseWriter, r *http.Request) error {
-	return types.ErrNotFound
+	return errors.ErrNotFound
 }
 
 func (m *Mixer) ServeHTTP(w http.ResponseWriter, r *http.Request) {

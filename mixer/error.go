@@ -3,6 +3,7 @@ package mix
 import (
 	"net/http"
 
+	"go.sancus.dev/mix/errors"
 	"go.sancus.dev/mix/types"
 )
 
@@ -20,7 +21,7 @@ func DefaultErrorHandler(w http.ResponseWriter, r *http.Request, err error) {
 			code = http.StatusInternalServerError
 		}
 
-		h = &types.HandlerError{
+		h = &errors.HandlerError{
 			Code: code,
 			Err:  err,
 		}
@@ -30,7 +31,7 @@ func DefaultErrorHandler(w http.ResponseWriter, r *http.Request, err error) {
 }
 
 func (m *Mixer) NotFound(w http.ResponseWriter, r *http.Request) {
-	m.config.ErrorHandler(w, r, types.ErrNotFound)
+	m.config.ErrorHandler(w, r, errors.ErrNotFound)
 }
 
 func (m *Mixer) SetErrorHandler(f types.ErrorHandler) error {

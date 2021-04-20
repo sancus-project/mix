@@ -33,5 +33,3 @@ func (t *Tree) Len() int {
 
 	return t.trie.Len()
 }
-
-
