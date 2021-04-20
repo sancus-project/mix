@@ -10,6 +10,5 @@ type RouterConstructor interface {
 }
 
 type Router interface {
-	http.Handler
-	Routes
+	Handler
 }
