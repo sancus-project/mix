@@ -33,8 +33,7 @@ func (err HandlerError) Unwrap() error {
 	return err.Err
 }
 
-func (err HandlerError) String() string {
-	code := err.Status()
+func ErrorText(code int) string {
 	text := http.StatusText(code)
 
 	if len(text) == 0 {
@@ -46,14 +45,22 @@ func (err HandlerError) String() string {
 	return text
 }
 
+func (err HandlerError) String() string {
+	return ErrorText(err.Status())
+}
+
 func (err HandlerError) Error() string {
-	return err.String()
+	return ErrorText(err.Status())
 }
 
 func (err HandlerError) ServeHTTP(w http.ResponseWriter, _ *http.Request) {
-	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-	w.Header().Set("X-Content-Type-Options", "nosniff")
-	w.WriteHeader(err.Status())
+	if code := err.Status(); code == http.StatusOK {
+		w.WriteHeader(http.StatusNoContent)
+	} else {
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		w.WriteHeader(code)
 
-	fmt.Fprintln(w, err)
+		fmt.Fprintln(w, ErrorText(code))
+	}
 }
