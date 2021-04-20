@@ -1,4 +1,4 @@
-package mix
+package mixer
 
 import (
 	"go.sancus.dev/mix/types"
