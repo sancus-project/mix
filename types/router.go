@@ -2,6 +2,8 @@ package types
 
 import (
 	"net/http"
+
+	"go.sancus.dev/web"
 )
 
 type RouterConstructor interface {
@@ -10,5 +12,5 @@ type RouterConstructor interface {
 }
 
 type Router interface {
-	Handler
+	web.Handler
 }

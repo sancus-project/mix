@@ -6,7 +6,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	"go.sancus.dev/mix/types"
+	"go.sancus.dev/web"
 )
 
 // Middleware
@@ -66,7 +66,7 @@ func (m *Mixer) MiddlewareHandler(w http.ResponseWriter, r *http.Request, next h
 	}
 }
 
-func (m *Mixer) Middleware(prefix string) types.MiddlewareHandlerFunc {
+func (m *Mixer) Middleware(prefix string) web.MiddlewareHandlerFunc {
 
 	// Wrap MiddlewareHandler
 	fn := func(next http.Handler) http.Handler {

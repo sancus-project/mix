@@ -2,6 +2,8 @@ package types
 
 import (
 	"net/http"
+
+	"go.sancus.dev/web"
 )
 
 type Mixer interface {
@@ -12,6 +14,6 @@ type Mixer interface {
 	Close() error
 	Reload() error
 
-	Middleware(prefix string) MiddlewareHandlerFunc
+	Middleware(prefix string) web.MiddlewareHandlerFunc
 	Sitemap(prefix string) http.HandlerFunc
 }

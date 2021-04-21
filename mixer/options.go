@@ -1,12 +1,12 @@
 package mixer
 
 import (
-	"go.sancus.dev/mix/types"
+	"go.sancus.dev/web"
 )
 
 // Config
 type MixerConfig struct {
-	ErrorHandler types.ErrorHandler
+	ErrorHandler web.ErrorHandlerFunc
 }
 
 // Options

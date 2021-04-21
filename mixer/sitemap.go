@@ -3,7 +3,7 @@ package mixer
 import (
 	"net/http"
 
-	"go.sancus.dev/mix/errors"
+	"go.sancus.dev/web/errors"
 )
 
 func (m *Mixer) Sitemap(prefix string) http.HandlerFunc {

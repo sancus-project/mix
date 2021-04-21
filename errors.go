@@ -1,7 +1,7 @@
 package mix
 
 import (
-	"go.sancus.dev/mix/errors"
+	"go.sancus.dev/web/errors"
 )
 
 var (
