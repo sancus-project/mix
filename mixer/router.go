@@ -1,18 +1,20 @@
 package mixer
 
 import (
-	"go.sancus.dev/mix/types"
+	"net/http"
+
+	"github.com/go-chi/chi/v5"
 )
 
 type Router struct {
 	mixer *Mixer
 
-	routes      []types.Route
-	middlewares types.Middlewares
+	routes      []chi.Route
+	middlewares chi.Middlewares
 }
 
 // Mount
-func (m *Mixer) Mount(pattern string, router types.Router) {
+func (m *Mixer) Mount(pattern string, h http.Handler) {
 }
 
 // Close
@@ -26,14 +28,14 @@ func (m *Mixer) Reload() error {
 }
 
 // types.Routes
-func (r *Router) Routes() []types.Route {
+func (r *Router) Routes() []chi.Route {
 	return r.routes
 }
 
-func (r *Router) Middlewares() types.Middlewares {
+func (r *Router) Middlewares() chi.Middlewares {
 	return r.middlewares
 }
 
-func (r *Router) Match(rctx *types.Context, method, path string) bool {
+func (r *Router) Match(rctx *chi.Context, method, path string) bool {
 	return false
 }
