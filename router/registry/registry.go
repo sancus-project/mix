@@ -2,6 +2,7 @@ package registry
 
 import (
 	"errors"
+	"net/http"
 	"sort"
 
 	"go.sancus.dev/mix/types"
@@ -10,7 +11,8 @@ import (
 var list []types.RouterConstructor
 
 func less(i, j int) bool {
-	return list[i].Priority() < list[j].Priority()
+	// inverted order
+	return list[i].Priority() > list[j].Priority()
 }
 
 func RegisterRouterConstructor(f types.RouterConstructor) error {
@@ -19,5 +21,14 @@ func RegisterRouterConstructor(f types.RouterConstructor) error {
 	}
 	list = append(list, f)
 	sort.Slice(list, less)
+	return nil
+}
+
+func NewRouter(pattern string, h http.Handler) types.Router {
+	for _, t := range list {
+		if r, ok := t.New(pattern, h); ok {
+			return r
+		}
+	}
 	return nil
 }
