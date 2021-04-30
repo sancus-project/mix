@@ -16,7 +16,7 @@ func (m *Mixer) MiddlewareHandler(w http.ResponseWriter, r *http.Request, next h
 	if prefix == "/" || prefix == "" {
 		// no prefix
 
-		if err = m.Handle(w, r); err == nil {
+		if err = m.TryServeHTTP(w, r); err == nil {
 			// Done.
 			return
 		}
@@ -48,7 +48,7 @@ func (m *Mixer) MiddlewareHandler(w http.ResponseWriter, r *http.Request, next h
 					r.URL.Path = path
 				}
 
-				if err = m.Handle(w, r); err == nil {
+				if err = m.TryServeHTTP(w, r); err == nil {
 					// Done.
 					return
 				}

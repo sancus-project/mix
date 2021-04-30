@@ -10,6 +10,6 @@ type ChiRouter struct {
 	h ChiHandler
 }
 
-func (h *ChiRouter) Handle(w http.ResponseWriter, r *http.Request) error {
+func (h *ChiRouter) TryServeHTTP(w http.ResponseWriter, r *http.Request) error {
 	return errors.ErrNotFound
 }
