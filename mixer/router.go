@@ -12,11 +12,57 @@ import (
 	"go.sancus.dev/mix/types"
 )
 
-type Router struct {
-	mixer *Mixer
-	mu    sync.Mutex
+// Expression based routers
+type RouterExp struct {
+	Keys   []tree.Segment
+	Values []types.Router
 
 	trie *radix.Tree
+}
+
+// Adds a expression/router pair to the table
+func (t *RouterExp) Append(key tree.Segment, value types.Router) {
+	t.Keys = append(t.Keys, key)
+	t.Values = append(t.Values, value)
+	t.trie.Insert(key.String(), value)
+}
+
+// Returns all expression based routers that match a segment string
+func (t *RouterExp) Match(s string) ([]tree.Match, []types.Router, bool) {
+	var matches []tree.Match
+	var routers []types.Router
+
+	for i, k := range t.Keys {
+		if v, ok := k.Match(s); ok {
+			r := t.Values[i]
+
+			matches = append(matches, v)
+			routers = append(routers, r)
+		}
+	}
+
+	if len(routers) > 0 {
+		return matches, routers, true
+	}
+
+	return nil, nil, false
+}
+
+// Finds router by expression
+func (t *RouterExp) Get(key tree.Segment) (r types.Router, ok bool) {
+	if v, ok := t.trie.Get(key.String()); ok {
+		r, ok = v.(types.Router)
+	}
+	return
+}
+
+// Router description at a specific segment
+type Router struct {
+	mixer *Mixer
+	mu    sync.RWMutex
+
+	trie *radix.Tree
+	exps RouterExp
 
 	handler []types.Handler
 }
@@ -24,6 +70,30 @@ type Router struct {
 func (m *Mixer) initRouter(r *Router) {
 	r.mixer = m
 	r.trie = radix.New()
+	r.exps.trie = radix.New()
+}
+
+// Match
+func (m *Router) match(s string) ([]tree.Match, []types.Router, bool) {
+	var matches []tree.Match
+	var routers []types.Router
+
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	// Expressions
+	if v, r, ok := m.exps.Match(s); ok {
+		matches = append(matches, v...)
+		routers = append(routers, r...)
+	}
+
+	// Literal strings
+
+	if len(routers) > 0 {
+		return matches, routers, true
+	}
+
+	return nil, nil, false
 }
 
 // Gets Router for a given path pattern
@@ -46,7 +116,45 @@ func (m *Router) Route(pattern string, fn func(r types.Router)) types.Router {
 }
 
 func (m *Router) route(p []tree.Segment) *Router {
-	return nil
+	var r *Router
+	var p0 tree.Segment
+	var s string
+
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	p0, p = p[0], p[1:]
+	s = p0.String()
+
+	if _, ok := p0.(tree.Literal); ok {
+		// literal string
+		v, ok := m.trie.Get(s)
+		if ok {
+			// reuse
+			r = v.(*Router)
+		} else {
+			// new
+			r = m.mixer.NewRouter()
+			m.trie.Insert(s, r)
+		}
+	} else {
+		// pattern
+		v, ok := m.exps.Get(p0)
+		if ok {
+			// reuse
+			r = v.(*Router)
+		} else {
+			// new
+			r = m.mixer.NewRouter()
+			m.exps.Append(p0, r)
+		}
+	}
+
+	if len(p) == 0 {
+		return r
+	} else {
+		return r.route(p)
+	}
 }
 
 // Mounts handler at path
