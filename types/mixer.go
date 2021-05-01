@@ -9,8 +9,6 @@ import (
 type Mixer interface {
 	Router
 
-	Mount(string, http.Handler)
-
 	Close() error
 	Reload() error
 

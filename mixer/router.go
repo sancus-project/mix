@@ -1,44 +1,31 @@
 package mixer
 
 import (
+	"errors"
 	"net/http"
-
-	"github.com/go-chi/chi/v5"
-
-	"go.sancus.dev/mix/wrapper"
+	"strings"
 )
 
 type Router struct {
 	mixer *Mixer
-
-	routes      []chi.Route
-	middlewares chi.Middlewares
 }
 
-// Mount
-func (m *Mixer) Mount(pattern string, h http.Handler) {
-	wrapper.NewWrapper(pattern, h)
-}
+// Mounts handler at path
+func (m *Router) Mount(path string, h http.Handler) error {
+	var pattern string
 
-// Close
-func (m *Mixer) Close() error {
-	return nil
-}
+	if path == "" {
+		pattern = "/*"
+	} else if strings.HasSuffix(path, "/") {
+		pattern = path + "*"
+	} else {
+		pattern = path
+	}
 
-// Reload
-func (m *Mixer) Reload() error {
-	return nil
-}
+	_, _, err := m.mixer.NewHandler(pattern, h)
+	if err != nil {
+		return err
+	}
 
-// types.Routes
-func (r *Router) Routes() []chi.Route {
-	return r.routes
-}
-
-func (r *Router) Middlewares() chi.Middlewares {
-	return r.middlewares
-}
-
-func (r *Router) Match(rctx *chi.Context, method, path string) bool {
-	return false
+	return errors.New("Not Implemented")
 }
