@@ -2,6 +2,7 @@ package tree
 
 type Segment interface {
 	Match(string) (Match, bool)
+	String() string
 }
 
 type Literal string
@@ -13,10 +14,18 @@ func (v Literal) Match(s string) (Match, bool) {
 	return nil, false
 }
 
+func (v Literal) String() string {
+	return string(v)
+}
+
 type CatchAll struct{}
 
 func (_ CatchAll) Match(s string) (Match, bool) {
 	return s, true
+}
+
+func (_ CatchAll) String() string {
+	return "*"
 }
 
 func NewSegment(s string) (Segment, bool) {
