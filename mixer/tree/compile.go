@@ -4,7 +4,7 @@ import (
 	"strings"
 )
 
-func compile(chunks ...string) (Path, bool) {
+func compile(chunks ...string) ([]Segment, bool) {
 	var list []Segment
 
 	last := len(chunks) - 1
@@ -29,14 +29,13 @@ func compile(chunks ...string) (Path, bool) {
 	}
 
 done:
-	return Path(list), true
+	return list, true
 fail:
 	return nil, false
 }
 
-func Compile(pattern string) (Path, error) {
+func Compile(pattern string) ([]Segment, error) {
 	chunks := strings.Split(pattern, "/")
-
 	if len(chunks) > 1 && len(chunks[0]) == 0 {
 
 		if p, ok := compile(chunks...); ok {
