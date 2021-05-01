@@ -10,8 +10,9 @@ import (
 )
 
 type Mixer struct {
-	sync.RWMutex
 	Router
+
+	mu sync.RWMutex
 
 	// singleton
 	wrapper map[http.Handler]types.Handler
@@ -44,8 +45,8 @@ func NewMixer(options ...MixerOption) (types.Mixer, error) {
 }
 
 func (m *Mixer) NewHandler(pattern string, h http.Handler) (types.Handler, error) {
-	m.Lock()
-	defer m.Unlock()
+	m.mu.Lock()
+	defer m.mu.Unlock()
 
 	r, ok := m.wrapper[h]
 	if !ok {
