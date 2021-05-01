@@ -1,7 +1,21 @@
 package tree
 
-type Path struct{}
+import (
+	"go.sancus.dev/mix/tree/segment"
+)
+
+type Path struct {
+	s []segment.Segment
+}
 
 func Compile(pattern string) (*Path, error) {
-	return nil, InvalidPattern(pattern)
+	s, ok := segment.Compile(pattern)
+	if !ok {
+		return nil, InvalidPattern(pattern)
+	}
+
+	p := &Path{
+		s: s,
+	}
+	return p, nil
 }
