@@ -6,7 +6,7 @@ import (
 	"go.sancus.dev/mix/types"
 )
 
-type RouterConstructor interface {
+type WrapperConstructor interface {
 	Priority() int                                  // Priority() defines Test order
-	New(string, http.Handler) (types.Handler, bool) // Attempts to create a Router from a http.Handler
+	New(string, http.Handler) (types.Handler, bool) // Attempts to create a Wrapper from a http.Handler
 }

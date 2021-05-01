@@ -10,23 +10,23 @@ import (
 
 const ConstructorPriority = 5
 
-type ChiRouterConstructor struct{}
+type ChiWrapperConstructor struct{}
 
-func (_ ChiRouterConstructor) Priority() int {
+func (_ ChiWrapperConstructor) Priority() int {
 	return ConstructorPriority
 }
 
-func (f *ChiRouterConstructor) New(pattern string, h http.Handler) (types.Handler, bool) {
+func (f *ChiWrapperConstructor) New(pattern string, h http.Handler) (types.Handler, bool) {
 	if v, ok := h.(ChiHandler); ok {
-		r := &ChiRouter{h: v}
+		r := &ChiWrapper{h: v}
 		return r, true
 	}
 	return nil, false
 }
 
 func init() {
-	f := &ChiRouterConstructor{}
-	if err := registry.RegisterRouterConstructor(f); err != nil {
+	f := &ChiWrapperConstructor{}
+	if err := registry.RegisterWrapperConstructor(f); err != nil {
 		log.Fatal(err)
 	}
 }

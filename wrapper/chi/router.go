@@ -6,10 +6,10 @@ import (
 	"go.sancus.dev/web/errors"
 )
 
-type ChiRouter struct {
+type ChiWrapper struct {
 	h ChiHandler
 }
 
-func (h *ChiRouter) TryServeHTTP(w http.ResponseWriter, r *http.Request) error {
+func (h *ChiWrapper) TryServeHTTP(w http.ResponseWriter, r *http.Request) error {
 	return errors.ErrNotFound
 }

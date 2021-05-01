@@ -8,16 +8,16 @@ import (
 	"go.sancus.dev/mix/types"
 )
 
-var list []RouterConstructor
+var list []WrapperConstructor
 
 func less(i, j int) bool {
 	// inverted order
 	return list[i].Priority() > list[j].Priority()
 }
 
-func RegisterRouterConstructor(f RouterConstructor) error {
+func RegisterWrapperConstructor(f WrapperConstructor) error {
 	if f == nil {
-		return errors.New("RegisterRouterConstructor called without function")
+		return errors.New("RegisterWrapperConstructor called without function")
 	}
 	list = append(list, f)
 	sort.Slice(list, less)
