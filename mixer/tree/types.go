@@ -7,3 +7,5 @@ import (
 type (
 	Segment = segment.Segment
 )
+
+type Path []segment.Segment

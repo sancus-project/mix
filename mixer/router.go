@@ -36,7 +36,7 @@ func (m *Router) Route(pattern string, fn func(r types.Router)) types.Router {
 	return r
 }
 
-func (m *Router) route(p *tree.Path) *Router {
+func (m *Router) route(p tree.Path) *Router {
 	return nil
 }
 
