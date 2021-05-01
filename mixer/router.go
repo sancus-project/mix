@@ -6,6 +6,8 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/armon/go-radix"
+
 	"go.sancus.dev/mix/mixer/tree"
 	"go.sancus.dev/mix/types"
 )
@@ -14,7 +16,14 @@ type Router struct {
 	mixer *Mixer
 	mu    sync.Mutex
 
+	trie *radix.Tree
+
 	handler []types.Handler
+}
+
+func (m *Mixer) initRouter(r *Router) {
+	r.mixer = m
+	r.trie = radix.New()
 }
 
 // Gets Router for a given path pattern

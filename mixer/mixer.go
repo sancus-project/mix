@@ -27,7 +27,7 @@ func NewMixer(options ...MixerOption) (types.Mixer, error) {
 		wrapper: make(map[http.Handler]types.Handler),
 	}
 
-	m.Router.mixer = m
+	m.initRouter(&m.Router)
 
 	// Configure
 	for _, opt := range options {
@@ -42,6 +42,12 @@ func NewMixer(options ...MixerOption) (types.Mixer, error) {
 	}
 
 	return m, nil
+}
+
+func (m *Mixer) NewRouter() *Router {
+	r := &Router{}
+	m.initRouter(r)
+	return r
 }
 
 func (m *Mixer) NewHandler(pattern string, h http.Handler) (types.Handler, error) {
