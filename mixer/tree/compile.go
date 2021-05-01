@@ -36,7 +36,9 @@ fail:
 
 func Compile(pattern string) ([]Segment, error) {
 	chunks := strings.Split(pattern, "/")
+
 	if len(chunks) > 1 && len(chunks[0]) == 0 {
+		chunks = chunks[1:]
 
 		if p, ok := compile(chunks...); ok {
 			return p, nil
