@@ -1,11 +1,5 @@
 package tree
 
-import (
-	"go.sancus.dev/mix/mixer/segment"
-)
+type Segment interface{}
 
-type (
-	Segment = segment.Segment
-)
-
-type Path []segment.Segment
+type Path []Segment

@@ -1,6 +1,4 @@
-package segment
-
-type Segment interface{}
+package tree
 
 func NewSegment(s string) (Segment, bool) {
 	if len(s) > 0 {

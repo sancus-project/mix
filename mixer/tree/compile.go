@@ -1,10 +1,10 @@
-package segment
+package tree
 
 import (
 	"strings"
 )
 
-func compile(chunks ...string) ([]Segment, bool) {
+func compile(chunks ...string) (Path, bool) {
 	var list []Segment
 
 	last := len(chunks) - 1
@@ -29,16 +29,20 @@ func compile(chunks ...string) ([]Segment, bool) {
 	}
 
 done:
-	return list, true
+	return Path(list), true
 fail:
 	return nil, false
 }
 
-func Compile(pattern string) ([]Segment, bool) {
+func Compile(pattern string) (Path, error) {
 	chunks := strings.Split(pattern, "/")
+
 	if len(chunks) > 1 && len(chunks[0]) == 0 {
-		return compile(chunks[1:]...)
+
+		if p, ok := compile(chunks...); ok {
+			return p, nil
+		}
 	}
 
-	return nil, false
+	return nil, InvalidPattern(pattern)
 }
