@@ -9,5 +9,9 @@ import (
 type Router interface {
 	web.Handler
 
-	Mount(pattern string, h http.Handler) error
+	Route(pattern string, fn func(r Router)) Router
+
+	Mount(path string, h http.Handler) error
+
+	Attach(h http.Handler) error
 }

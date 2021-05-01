@@ -6,12 +6,12 @@ import (
 	"go.sancus.dev/web/errors"
 )
 
-func (m *Mixer) TryServeHTTP(w http.ResponseWriter, r *http.Request) error {
+func (m *Router) TryServeHTTP(w http.ResponseWriter, r *http.Request) error {
 	return errors.ErrNotFound
 }
 
-func (m *Mixer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (m *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err := m.TryServeHTTP(w, r); err != nil {
-		m.config.ErrorHandler(w, r, err)
+		m.mixer.config.ErrorHandler(w, r, err)
 	}
 }

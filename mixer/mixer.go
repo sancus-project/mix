@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"sync"
 
-	"go.sancus.dev/mix/tree"
 	"go.sancus.dev/mix/types"
 	"go.sancus.dev/mix/wrapper"
 )
@@ -44,27 +43,21 @@ func NewMixer(options ...MixerOption) (types.Mixer, error) {
 	return m, nil
 }
 
-// Preprocesses pattern and handler for Router.Route()/Router.Mount()
-func (m *Mixer) NewHandler(pattern string, h http.Handler) (*tree.Path, types.Handler, error) {
+func (m *Mixer) NewHandler(pattern string, h http.Handler) (types.Handler, error) {
 	m.Lock()
 	defer m.Unlock()
-
-	p, err := tree.Compile(pattern)
-	if err != nil {
-		return nil, nil, err
-	}
 
 	r, ok := m.wrapper[h]
 	if !ok {
 		if r = wrapper.NewWrapper(pattern, h); r == nil {
-			err = errors.New("Handler not supported")
-			return nil, nil, err
+			err := errors.New("Handler not supported")
+			return nil, err
 		}
 
 		m.wrapper[h] = r
 	}
 
-	return p, r, nil
+	return r, nil
 }
 
 // Close
