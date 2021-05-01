@@ -4,18 +4,16 @@ import (
 	"errors"
 	"net/http"
 	"sort"
-
-	"go.sancus.dev/mix/types"
 )
 
-var list []types.RouterConstructor
+var list []RouterConstructor
 
 func less(i, j int) bool {
 	// inverted order
 	return list[i].Priority() > list[j].Priority()
 }
 
-func RegisterRouterConstructor(f types.RouterConstructor) error {
+func RegisterRouterConstructor(f RouterConstructor) error {
 	if f == nil {
 		return errors.New("RegisterRouterConstructor called without function")
 	}
@@ -24,7 +22,7 @@ func RegisterRouterConstructor(f types.RouterConstructor) error {
 	return nil
 }
 
-func NewRouter(pattern string, h http.Handler) types.Router {
+func NewRouter(pattern string, h http.Handler) Router {
 	for _, t := range list {
 		if r, ok := t.New(pattern, h); ok {
 			return r

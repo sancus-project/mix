@@ -3,11 +3,9 @@ package router
 import (
 	"net/http"
 
-	"go.sancus.dev/mix/router/registry"
-
-	"go.sancus.dev/mix/types"
+	router "go.sancus.dev/mix/router/registry"
 )
 
-func NewRouter(pattern string, h http.Handler) types.Router {
-	return registry.NewRouter(pattern, h)
+func NewRouter(pattern string, h http.Handler) router.Router {
+	return router.NewRouter(pattern, h)
 }
