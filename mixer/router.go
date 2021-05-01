@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	"go.sancus.dev/mix/router"
+	"go.sancus.dev/mix/wrapper"
 )
 
 type Router struct {
@@ -17,7 +17,7 @@ type Router struct {
 
 // Mount
 func (m *Mixer) Mount(pattern string, h http.Handler) {
-	router.NewRouter(pattern, h)
+	wrapper.NewWrapper(pattern, h)
 }
 
 // Close

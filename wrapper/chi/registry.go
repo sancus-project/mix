@@ -4,7 +4,8 @@ import (
 	"log"
 	"net/http"
 
-	"go.sancus.dev/mix/router/registry"
+	"go.sancus.dev/mix/types"
+	"go.sancus.dev/mix/wrapper/registry"
 )
 
 const ConstructorPriority = 5
@@ -15,7 +16,7 @@ func (_ ChiRouterConstructor) Priority() int {
 	return ConstructorPriority
 }
 
-func (f *ChiRouterConstructor) New(pattern string, h http.Handler) (registry.Router, bool) {
+func (f *ChiRouterConstructor) New(pattern string, h http.Handler) (types.Handler, bool) {
 	if v, ok := h.(ChiHandler); ok {
 		r := &ChiRouter{h: v}
 		return r, true

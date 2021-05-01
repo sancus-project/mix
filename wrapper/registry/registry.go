@@ -4,6 +4,8 @@ import (
 	"errors"
 	"net/http"
 	"sort"
+
+	"go.sancus.dev/mix/types"
 )
 
 var list []RouterConstructor
@@ -22,7 +24,7 @@ func RegisterRouterConstructor(f RouterConstructor) error {
 	return nil
 }
 
-func NewRouter(pattern string, h http.Handler) Router {
+func NewWrapper(pattern string, h http.Handler) types.Handler {
 	for _, t := range list {
 		if r, ok := t.New(pattern, h); ok {
 			return r
