@@ -6,7 +6,7 @@ import (
 	"strings"
 	"sync"
 
-	"go.sancus.dev/mix/tree"
+	"go.sancus.dev/mix/mixer/tree"
 	"go.sancus.dev/mix/types"
 )
 

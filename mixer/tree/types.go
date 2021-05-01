@@ -1,7 +1,7 @@
 package tree
 
 import (
-	"go.sancus.dev/mix/tree/segment"
+	"go.sancus.dev/mix/mixer/segment"
 )
 
 type (
