@@ -2,6 +2,8 @@ package mixer
 
 import (
 	"net/http"
+
+	"go.sancus.dev/web/errors"
 )
 
 // types.GetRoutePathFunc
@@ -17,3 +19,6 @@ func DefaultSetRoutePath(r *http.Request, path string) {
 
 	r.URL.Path = path
 }
+
+// types.ErrorHandlerFunc
+var DefaultErrorHandler = errors.HandleError

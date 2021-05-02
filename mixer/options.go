@@ -64,6 +64,21 @@ func SetSetRoutePath(f types.SetRoutePathFunc) MixerOption {
 	})
 }
 
+// ErrorHandler
+func (m *Mixer) SetErrorHandler(f types.ErrorHandlerFunc) error {
+	if f == nil {
+		f = DefaultErrorHandler
+	}
+	m.config.ErrorHandler = f
+	return nil
+}
+
+func SetErrorHandler(f web.ErrorHandlerFunc) MixerOption {
+	return MixerOptionFunc(func(m *Mixer) error {
+		return m.SetErrorHandler(f)
+	})
+}
+
 // Defaults
 func (m *Mixer) SetDefaults() error {
 	m.SetGetRoutePath(m.config.GetRoutePath)
