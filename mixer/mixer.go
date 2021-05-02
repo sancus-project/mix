@@ -2,7 +2,6 @@ package mixer
 
 import (
 	"errors"
-	"net/http"
 	"sync"
 
 	"go.sancus.dev/mix/types"
@@ -15,7 +14,7 @@ type Mixer struct {
 	mu sync.RWMutex
 
 	// singleton
-	wrapper map[http.Handler]types.Handler
+	wrapper map[interface{}]types.Handler
 
 	config MixerConfig
 }
@@ -24,7 +23,7 @@ func NewMixer(options ...MixerOption) (types.Mixer, error) {
 
 	// Initialise
 	m := &Mixer{
-		wrapper: make(map[http.Handler]types.Handler),
+		wrapper: make(map[interface{}]types.Handler),
 	}
 
 	m.initRouter(&m.Router)
@@ -50,17 +49,19 @@ func (m *Mixer) NewRouter() *Router {
 	return r
 }
 
-func (m *Mixer) NewHandler(pattern string, h http.Handler) (types.Handler, error) {
+func (m *Mixer) newHandler(pattern string, h interface{}) (types.Handler, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
 	r, ok := m.wrapper[h]
-	if !ok {
-		if r = wrapper.NewWrapper(pattern, h); r == nil {
-			err := errors.New("Handler not supported")
-			return nil, err
-		}
-
+	if ok {
+		// known
+	} else if r, ok = wrapper.NewWrapper(pattern, h); !ok {
+		// unsupported
+		err := errors.New("Handler not supported")
+		return nil, err
+	} else {
+		// remember
 		m.wrapper[h] = r
 	}
 

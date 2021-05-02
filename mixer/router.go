@@ -2,7 +2,6 @@ package mixer
 
 import (
 	"log"
-	"net/http"
 	"strings"
 	"sync"
 
@@ -158,7 +157,7 @@ func (m *Router) route(p []tree.Segment) *Router {
 }
 
 // Mounts handler at path
-func (m *Router) Mount(path string, h http.Handler) error {
+func (m *Router) Mount(path string, h interface{}) error {
 	var pattern string
 
 	if path == "" {
@@ -174,7 +173,7 @@ func (m *Router) Mount(path string, h http.Handler) error {
 		return err
 	}
 
-	w, err := m.mixer.NewHandler(pattern, h)
+	w, err := m.mixer.newHandler(pattern, h)
 	if err != nil {
 		return err
 	}
@@ -183,8 +182,8 @@ func (m *Router) Mount(path string, h http.Handler) error {
 }
 
 // Attach handler to Router
-func (m *Router) Attach(h http.Handler) error {
-	w, err := m.mixer.NewHandler("/", h)
+func (m *Router) Attach(h interface{}) error {
+	w, err := m.mixer.newHandler("/", h)
 	if err != nil {
 		return err
 	}

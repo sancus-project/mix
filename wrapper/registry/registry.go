@@ -2,7 +2,6 @@ package registry
 
 import (
 	"errors"
-	"net/http"
 	"sort"
 
 	"go.sancus.dev/mix/types"
@@ -24,11 +23,11 @@ func RegisterWrapperConstructor(f WrapperConstructor) error {
 	return nil
 }
 
-func NewWrapper(pattern string, h http.Handler) types.Handler {
+func NewWrapper(pattern string, h interface{}) (types.Handler, bool) {
 	for _, t := range list {
 		if r, ok := t.New(pattern, h); ok {
-			return r
+			return r, true
 		}
 	}
-	return nil
+	return nil, false
 }
