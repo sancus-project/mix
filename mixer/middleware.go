@@ -4,8 +4,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/go-chi/chi/v5"
-
 	"go.sancus.dev/web"
 )
 
@@ -23,14 +21,7 @@ func (m *Mixer) MiddlewareHandler(w http.ResponseWriter, r *http.Request, next h
 
 	} else {
 		// check prefix
-		var path string
-
-		rctx := chi.RouteContext(r.Context())
-		if rctx != nil && rctx.RoutePath != "" {
-			path = rctx.RoutePath
-		} else {
-			path = r.URL.Path
-		}
+		path := m.config.GetRoutePath(r)
 
 		if s := strings.TrimPrefix(path, prefix); s != path {
 			if s == "" {
@@ -42,11 +33,7 @@ func (m *Mixer) MiddlewareHandler(w http.ResponseWriter, r *http.Request, next h
 			if path[0] == '/' {
 
 				// Update RoutePath before Handling
-				if rctx != nil {
-					rctx.RoutePath = path
-				} else {
-					r.URL.Path = path
-				}
+				m.config.SetRoutePath(r, path)
 
 				if err = m.TryServeHTTP(w, r); err == nil {
 					// Done.
