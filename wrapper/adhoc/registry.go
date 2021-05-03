@@ -20,6 +20,11 @@ func (f *AdhocWrapperConstructor) New(pattern string, h interface{}) (types.Hand
 	if v, ok := h.(http.Handler); ok {
 		r := &AdhocWrapper{h: v}
 		return r, true
+	} else if f, ok := h.(http.HandlerFunc); ok {
+		r := &AdhocWrapper{
+			h: http.HandlerFunc(f),
+		}
+		return r, true
 	}
 	return nil, false
 }
