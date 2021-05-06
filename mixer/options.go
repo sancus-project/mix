@@ -7,12 +7,11 @@ import (
 
 // Config
 type MixerConfig struct {
-	// Extracts RoutePath from http.Request
-	GetRoutePath types.GetRoutePathFunc
-	// Sets RoutePath to http.Request
-	SetRoutePath types.SetRoutePathFunc
-	// Error Handler
-	ErrorHandler web.ErrorHandlerFunc
+	GetRoutePath types.GetRoutePathFunc // Extracts RoutePath from http.Request
+	SetRoutePath types.SetRoutePathFunc // Sets RoutePath to http.Request
+	ErrorHandler web.ErrorHandlerFunc   // Error Handler
+
+	ServerTiming string // Server-Timing metric name
 }
 
 // Options
@@ -68,6 +67,18 @@ func (m *Mixer) SetErrorHandler(f types.ErrorHandlerFunc) error {
 func SetErrorHandler(f web.ErrorHandlerFunc) MixerOption {
 	return MixerOptionFunc(func(m *Mixer) error {
 		return m.SetErrorHandler(f)
+	})
+}
+
+// ServerTiming
+func (m *Mixer) SetServerTiming(name string) error {
+	m.config.ServerTiming = name
+	return nil
+}
+
+func SetServerTiming(name string) MixerOption {
+	return MixerOptionFunc(func(m *Mixer) error {
+		return m.SetServerTiming(name)
 	})
 }
 

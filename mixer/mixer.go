@@ -16,7 +16,8 @@ type Mixer struct {
 	// singleton
 	wrapper map[interface{}]types.Handler
 
-	config MixerConfig
+	config      MixerConfig
+	routerCount int
 }
 
 func NewMixer(options ...MixerOption) (types.Mixer, error) {

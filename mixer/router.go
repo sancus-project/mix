@@ -1,6 +1,7 @@
 package mixer
 
 import (
+	"fmt"
 	"log"
 	"strings"
 	"sync"
@@ -64,12 +65,21 @@ type Router struct {
 	exps RouterExp
 
 	handler []types.Handler
+
+	ServerTimingPrefix string
 }
 
 func (m *Mixer) initRouter(r *Router) {
+	n := m.routerCount
+	m.routerCount++
+
 	r.mixer = m
 	r.trie = radix.New()
 	r.exps.trie = radix.New()
+
+	if len(m.config.ServerTiming) > 0 {
+		m.ServerTimingPrefix = fmt.Sprintf("%s-%v", m.config.ServerTiming, n)
+	}
 }
 
 // Match
