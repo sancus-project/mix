@@ -1,28 +1,31 @@
 package mixer
 
 import (
+	//"log"
 	"net/http"
 	"strings"
 
 	"go.sancus.dev/web"
+	"go.sancus.dev/web/errors"
 )
 
 // Middleware
-func (m *Mixer) MiddlewareHandler(w http.ResponseWriter, r *http.Request, next http.Handler, prefix string) {
+func (m *Router) middlewareTryServeHTTP(w http.ResponseWriter, r *http.Request, prefix string, path string) error {
+
+	return errors.ErrNotFound
+}
+
+func (m *Router) MiddlewareHandler(w http.ResponseWriter, r *http.Request, next http.Handler, prefix string) {
 	var err error
+
+	path := m.mixer.config.GetRoutePath(r)
 
 	if prefix == "/" || prefix == "" {
 		// no prefix
-
-		if err = m.TryServeHTTP(w, r); err == nil {
-			// Done.
-			return
-		}
+		err = m.middlewareTryServeHTTP(w, r, "", path)
 
 	} else {
 		// check prefix
-		path := m.config.GetRoutePath(r)
-
 		if s := strings.TrimPrefix(path, prefix); s != path {
 			if s == "" {
 				path = "/"
@@ -31,37 +34,39 @@ func (m *Mixer) MiddlewareHandler(w http.ResponseWriter, r *http.Request, next h
 			}
 
 			if path[0] == '/' {
-
-				// Update RoutePath before Handling
-				m.config.SetRoutePath(r, path)
-
-				if err = m.TryServeHTTP(w, r); err == nil {
-					// Done.
-					return
-				}
+				err = m.middlewareTryServeHTTP(w, r, prefix, path)
+			} else {
+				err = errors.ErrNotFound
 			}
+		} else {
+			err = errors.ErrNotFound
+		}
+	}
+
+	if next != nil {
+		// skip 404
+		if e, ok := err.(web.Error); ok && e.Status() == http.StatusNotFound {
+			next.ServeHTTP(w, r)
+			return
 		}
 	}
 
 	// Failed
 	if err != nil {
-		m.config.ErrorHandler(w, r, err)
-	} else if next != nil {
-		next.ServeHTTP(w, r)
-	} else {
-		m.NotFound(w, r)
+		m.mixer.config.ErrorHandler(w, r, err)
 	}
 }
 
-func (m *Mixer) Middleware(prefix string) web.MiddlewareHandlerFunc {
-
-	// Wrap MiddlewareHandler
-	fn := func(next http.Handler) http.Handler {
+func (m *Router) Middleware(prefix string) web.MiddlewareHandlerFunc {
+	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
+			if t := m.GetServerTiming(r, "Middleware"); t != nil {
+				defer t.Start().Stop()
+			}
+
 			m.MiddlewareHandler(w, r, next, prefix)
 		}
 
 		return http.HandlerFunc(fn)
 	}
-	return fn
 }

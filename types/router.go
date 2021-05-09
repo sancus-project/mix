@@ -15,6 +15,8 @@ type Router interface {
 	http.Handler
 	Handler
 
+	Middleware(prefix string) web.MiddlewareHandlerFunc
+
 	Route(pattern string, fn func(r Router)) Router
 	Attach(h interface{}) error
 
@@ -27,6 +29,5 @@ type Mixer interface {
 	Close() error
 	Reload() error
 
-	Middleware(prefix string) web.MiddlewareHandlerFunc
 	Sitemap(prefix string) http.HandlerFunc
 }
