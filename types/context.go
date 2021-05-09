@@ -5,3 +5,8 @@ type Context struct {
 	RoutePath    string
 	RoutePattern string
 }
+
+// Clone() creates a copy of a routing Context object
+func (rctx Context) Clone() *Context {
+	return &rctx
+}

@@ -1,7 +1,6 @@
 package mixer
 
 import (
-	//"log"
 	"net/http"
 	"strings"
 
@@ -11,6 +10,16 @@ import (
 
 // Middleware
 func (m *Router) middlewareTryServeHTTP(w http.ResponseWriter, r *http.Request, prefix string, path string) error {
+
+	// New http.Request Context including our routing Context inside
+	ctx := m.NewContext(r, prefix, path)
+
+	// And new http.Request with it
+	r = r.WithContext(ctx)
+
+	if page, ok := m.pageinfo(r); ok {
+		return page.TryServeHTTP(w, r)
+	}
 
 	return errors.ErrNotFound
 }
@@ -24,23 +33,15 @@ func (m *Router) MiddlewareHandler(w http.ResponseWriter, r *http.Request, next 
 		// no prefix
 		err = m.middlewareTryServeHTTP(w, r, "", path)
 
+	} else if s := strings.TrimPrefix(path, prefix); s == path {
+		// doesn't match prefix
+		err = errors.ErrNotFound
+	} else if s == "" || s[0] == '/' {
+		// prefix match
+		err = m.middlewareTryServeHTTP(w, r, prefix, s)
 	} else {
-		// check prefix
-		if s := strings.TrimPrefix(path, prefix); s != path {
-			if s == "" {
-				path = "/"
-			} else {
-				path = s
-			}
-
-			if path[0] == '/' {
-				err = m.middlewareTryServeHTTP(w, r, prefix, path)
-			} else {
-				err = errors.ErrNotFound
-			}
-		} else {
-			err = errors.ErrNotFound
-		}
+		// doesn't match prefix
+		err = errors.ErrNotFound
 	}
 
 	if next != nil {
