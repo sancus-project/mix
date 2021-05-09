@@ -8,6 +8,7 @@ import (
 
 type Handler interface {
 	web.Handler
+	web.RouterPageInfo
 }
 
 type Router interface {

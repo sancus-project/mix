@@ -13,3 +13,7 @@ type ChiWrapper struct {
 func (h *ChiWrapper) TryServeHTTP(w http.ResponseWriter, r *http.Request) error {
 	return errors.ErrNotFound
 }
+
+func (h *ChiWrapper) PageInfo(r *http.Request) (interface{}, bool) {
+	return nil, false
+}

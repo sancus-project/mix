@@ -46,3 +46,7 @@ func (h *AdhocWrapper) TryServeHTTP(w http.ResponseWriter, r *http.Request) erro
 	TryHandler(w, r, h.h, &err)
 	return err
 }
+
+func (h *AdhocWrapper) PageInfo(r *http.Request) (interface{}, bool) {
+	return nil, false
+}
