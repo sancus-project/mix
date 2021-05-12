@@ -1,9 +1,11 @@
 package mixer
 
 import (
+	"context"
 	"net/http"
 	"strings"
 
+	"go.sancus.dev/mix"
 	"go.sancus.dev/web"
 	"go.sancus.dev/web/errors"
 )
@@ -11,13 +13,16 @@ import (
 // Middleware
 func (m *Router) middlewareTryServeHTTP(w http.ResponseWriter, r *http.Request, prefix string, path string) error {
 
-	// New http.Request Context including our routing Context inside
-	ctx := m.NewContext(r, prefix, path)
+	ctx := r.Context()
+	if ctx == nil {
+		ctx = context.Background()
+	}
 
-	// And new http.Request with it
-	r = r.WithContext(ctx)
+	if page, rctx, ok := m.GetPageFromPath(ctx, prefix, path); ok {
 
-	if page, ok := m.pageinfo(r); ok {
+		ctx = mix.WithRouteContext(ctx, rctx)
+		r = r.WithContext(ctx)
+
 		return page.TryServeHTTP(w, r)
 	}
 

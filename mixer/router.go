@@ -1,15 +1,19 @@
 package mixer
 
 import (
+	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"strings"
 	"sync"
 
 	"github.com/armon/go-radix"
 
+	"go.sancus.dev/mix"
 	"go.sancus.dev/mix/mixer/tree"
 	"go.sancus.dev/mix/types"
+	"go.sancus.dev/web"
 )
 
 // Expression based routers
@@ -103,6 +107,27 @@ func (m *Router) match(s string) ([]tree.Match, []types.Router, bool) {
 	}
 
 	return nil, nil, false
+}
+
+// GetPage
+func (m *Router) getpage(rctx *mix.Context) (web.Handler, *mix.Context, bool) {
+	return nil, nil, false
+}
+
+func (m *Router) GetPageFromPath(ctx context.Context, prefix, path string) (web.Handler, *mix.Context, bool) {
+
+	if rctx := mix.NewRouteContext(prefix, path); rctx != nil {
+		return m.getpage(rctx)
+	}
+
+	return nil, nil, false
+}
+
+func (m *Router) GetPage(ctx context.Context, r *http.Request) (web.Handler, *mix.Context, bool) {
+
+	path := m.mixer.config.GetRoutePath(r)
+
+	return m.GetPageFromPath(ctx, "/", path)
 }
 
 // Gets Router for a given path pattern

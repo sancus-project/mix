@@ -9,44 +9,43 @@ import (
 	"go.sancus.dev/web/errors"
 )
 
-func (m *Router) NewContext(r *http.Request, prefix, path string) context.Context {
+// web.RouterPageInfo
+func (m *Router) PageInfo(r *http.Request) (interface{}, bool) {
+	if t := m.GetServerTiming(r, "PageInfo"); t != nil {
+		defer t.Start().Stop()
+	}
 
 	ctx := r.Context()
 	if ctx == nil {
 		ctx = context.Background()
 	}
 
-	// New routing Context object
-	rctx := mix.NewRouteContext(prefix, path)
+	if page, rctx, ok := m.GetPage(ctx, r); !ok {
+		return nil, false
+	} else if h, ok := page.(web.RouterPageInfo); ok {
 
-	return mix.WithRouteContext(ctx, rctx)
-}
+		ctx = mix.WithRouteContext(ctx, rctx)
+		r = r.WithContext(ctx)
 
-// web.RouterPageInfo
-func (m *Router) pageinfo(r *http.Request) (web.Handler, bool) {
-	return nil, false
-}
-
-func (m *Router) PageInfo(r *http.Request) (interface{}, bool) {
-	if t := m.GetServerTiming(r, "PageInfo"); t != nil {
-		defer t.Start().Stop()
+		return h.PageInfo(r)
+	} else {
+		return page, true
 	}
-
-	return m.pageinfo(r)
 }
 
 // web.Handler
 func (m *Router) tryServeHTTP(w http.ResponseWriter, r *http.Request) error {
 
-	path := m.mixer.config.GetRoutePath(r)
+	ctx := r.Context()
+	if ctx == nil {
+		ctx = context.Background()
+	}
 
-	// New http.Request Context including our routing Context inside
-	ctx := m.NewContext(r, "", path)
+	if page, rctx, ok := m.GetPage(ctx, r); ok {
 
-	// And new http.Request with it
-	r = r.WithContext(ctx)
+		ctx = mix.WithRouteContext(ctx, rctx)
+		r = r.WithContext(ctx)
 
-	if page, ok := m.pageinfo(r); ok {
 		return page.TryServeHTTP(w, r)
 	}
 
