@@ -1,6 +1,7 @@
 package types
 
 import (
+	"context"
 	"path/filepath"
 	"strings"
 )
@@ -16,7 +17,7 @@ func (rctx Context) Clone() *Context {
 	return &rctx
 }
 
-func (rctx *Context) Init(prefix, path string) error {
+func (rctx *Context) Init(ctx context.Context, prefix, path string) error {
 	var pattern string
 
 	if prefix == "" {

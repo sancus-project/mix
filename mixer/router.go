@@ -116,7 +116,7 @@ func (m *Router) getpage(rctx *mix.Context) (web.Handler, *mix.Context, bool) {
 
 func (m *Router) GetPageFromPath(ctx context.Context, prefix, path string) (web.Handler, *mix.Context, bool) {
 
-	if rctx := mix.NewRouteContext(prefix, path); rctx != nil {
+	if rctx := mix.NewRouteContext(ctx, prefix, path); rctx != nil {
 		return m.getpage(rctx)
 	}
 

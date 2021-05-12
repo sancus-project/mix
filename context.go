@@ -20,9 +20,9 @@ func RouteContext(ctx context.Context) *Context {
 }
 
 // NewRouteContext returns a new routing Context object.
-func NewRouteContext(prefix, path string) *Context {
+func NewRouteContext(ctx context.Context, prefix, path string) *Context {
 	rctx := &Context{}
-	if err := rctx.Init(prefix, path); err != nil {
+	if err := rctx.Init(ctx, prefix, path); err != nil {
 		panic(err)
 	}
 	return rctx
