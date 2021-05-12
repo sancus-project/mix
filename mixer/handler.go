@@ -3,8 +3,6 @@ package mixer
 import (
 	"context"
 	"net/http"
-	"path/filepath"
-	"strings"
 
 	"go.sancus.dev/mix"
 	"go.sancus.dev/web"
@@ -19,36 +17,7 @@ func (m *Router) NewContext(r *http.Request, prefix, path string) context.Contex
 	}
 
 	// New routing Context object
-	rctx := mix.RouteContext(ctx)
-	if rctx == nil {
-		rctx = mix.NewRouteContext()
-	} else {
-		rctx = rctx.Clone()
-	}
-
-	if rctx.RoutePath == "" {
-		// New routing Context
-		var pattern string
-
-		if prefix == "" {
-			prefix = "/"
-		}
-
-		if path == "" {
-			path, pattern = prefix, prefix
-		} else if n := strings.IndexRune(path[1:], '/'); n < 0 {
-			pattern = filepath.Join(prefix, path)
-		} else {
-			pattern = filepath.Join(prefix, path[0:n+1]) + "/*"
-		}
-
-		rctx.RoutePrefix = prefix
-		rctx.RoutePattern = pattern
-		rctx.RoutePath = path
-	} else {
-		// Update
-		panic(errors.New("Nested Mixer not implemented"))
-	}
+	rctx := mix.NewRouteContext(prefix, path)
 
 	return mix.WithRouteContext(ctx, rctx)
 }

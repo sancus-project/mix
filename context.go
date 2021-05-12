@@ -20,8 +20,12 @@ func RouteContext(ctx context.Context) *Context {
 }
 
 // NewRouteContext returns a new routing Context object.
-func NewRouteContext() *Context {
-	return &Context{}
+func NewRouteContext(prefix, path string) *Context {
+	rctx := &Context{}
+	if err := rctx.Init(prefix, path); err != nil {
+		panic(err)
+	}
+	return rctx
 }
 
 // WithRouteContext returns a new http.Request Context with
@@ -32,7 +36,7 @@ func WithRouteContext(ctx context.Context, rctx *Context) context.Context {
 		ctx = context.Background()
 	}
 	if rctx == nil {
-		rctx = NewRouteContext()
+		rctx = &Context{}
 	}
 	return context.WithValue(ctx, RouteCtxKey, rctx)
 }
