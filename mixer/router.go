@@ -94,13 +94,19 @@ func (m *Router) match(s string) ([]tree.Match, []types.Router, bool) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
+	// Literal strings
+	if v, ok := m.trie.Get(s); ok {
+		if r, ok := v.(*Router); ok {
+			matches = append(matches, s)
+			routers = append(routers, r)
+		}
+	}
+
 	// Expressions
 	if v, r, ok := m.exps.Match(s); ok {
 		matches = append(matches, v...)
 		routers = append(routers, r...)
 	}
-
-	// Literal strings
 
 	if len(routers) > 0 {
 		return matches, routers, true
