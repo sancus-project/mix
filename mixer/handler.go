@@ -11,6 +11,7 @@ import (
 
 // web.RouterPageInfo
 func (m *Router) PageInfo(r *http.Request) (interface{}, bool) {
+	// Server-Timing
 	if t := m.GetServerTiming(r, "PageInfo"); t != nil {
 		defer t.Start().Stop()
 	}
@@ -20,7 +21,7 @@ func (m *Router) PageInfo(r *http.Request) (interface{}, bool) {
 		ctx = context.Background()
 	}
 
-	if page, rctx, ok := m.GetPage(ctx, r); !ok {
+	if page, rctx, ok := m.ResolveRequest(ctx, r); !ok {
 		return nil, false
 	} else if h, ok := page.(web.RouterPageInfo); ok {
 
@@ -41,7 +42,7 @@ func (m *Router) tryServeHTTP(w http.ResponseWriter, r *http.Request) error {
 		ctx = context.Background()
 	}
 
-	if page, rctx, ok := m.GetPage(ctx, r); ok {
+	if page, rctx, ok := m.ResolveRequest(ctx, r); ok {
 
 		ctx = mix.WithRouteContext(ctx, rctx)
 		r = r.WithContext(ctx)

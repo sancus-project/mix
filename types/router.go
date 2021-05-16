@@ -21,6 +21,8 @@ type Router interface {
 	Attach(h interface{}) error
 
 	Mount(path string, h interface{}) error
+
+	Resolve(*Context) (web.Handler, *Context, bool)
 }
 
 type Mixer interface {

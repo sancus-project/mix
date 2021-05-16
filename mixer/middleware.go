@@ -18,7 +18,7 @@ func (m *Router) middlewareTryServeHTTP(w http.ResponseWriter, r *http.Request, 
 		ctx = context.Background()
 	}
 
-	if page, rctx, ok := m.GetPageFromPath(ctx, prefix, path); ok {
+	if page, rctx, ok := m.ResolvePath(ctx, prefix, path); ok {
 
 		ctx = mix.WithRouteContext(ctx, rctx)
 		r = r.WithContext(ctx)

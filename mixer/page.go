@@ -4,10 +4,8 @@ import (
 	"log"
 	"net/http"
 
-	"go.sancus.dev/mix"
 	"go.sancus.dev/mix/types"
 	"go.sancus.dev/web"
-	"go.sancus.dev/web/errors"
 )
 
 type MixPage struct {
@@ -29,36 +27,4 @@ func NewMixPage(h []types.Handler) web.Handler {
 		copy(h1, h)
 		return &MixPage{h: h1}
 	}
-}
-
-func (m *Router) getPage(rctx *mix.Context) (web.Handler, *mix.Context, bool) {
-
-	path := rctx.RoutePath
-	log.Printf("path:%q % #v", path, rctx)
-
-	if path == "/" {
-		if rctx.RoutePrefix == "/" {
-			path = ""
-		} else {
-			h := errors.NewPermanentRedirect(rctx.RoutePrefix)
-			return h, rctx, true
-		}
-	}
-
-	if path == "" {
-		// exact match
-
-		m.mu.Lock()
-		defer m.mu.Unlock()
-
-		if len(m.handler) == 0 {
-			goto fail
-		} else {
-			return NewMixPage(m.handler), rctx, true
-		}
-
-	}
-
-fail:
-	return nil, nil, false
 }

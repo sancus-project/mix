@@ -68,8 +68,8 @@ func (rctx *Context) Next() (*Context, string) {
 		}
 
 		next := &Context{
-			RoutePath: path,
-			RoutePrefix: prefix,
+			RoutePath:    path,
+			RoutePrefix:  prefix,
 			RoutePattern: pattern,
 		}
 
