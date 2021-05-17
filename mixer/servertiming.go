@@ -7,7 +7,7 @@ import (
 	"github.com/mitchellh/go-server-timing"
 )
 
-func (m *Router) GetServerTiming(r *http.Request, name string) *servertiming.Metric {
+func (m *router) GetServerTiming(r *http.Request, name string) *servertiming.Metric {
 	if len(m.ServerTimingPrefix) > 0 {
 		if len(name) > 0 {
 			name = fmt.Sprintf("%s.%s", m.ServerTimingPrefix, name)

@@ -9,7 +9,7 @@ import (
 )
 
 type Mixer struct {
-	Router
+	RouterNode
 
 	mu sync.RWMutex
 
@@ -27,7 +27,7 @@ func NewMixer(options ...MixerOption) (types.Mixer, error) {
 		wrapper: make(map[interface{}]types.Handler),
 	}
 
-	m.initRouter(&m.Router)
+	m.initRouter(&m.RouterNode)
 
 	// Configure
 	for _, opt := range options {
@@ -42,12 +42,6 @@ func NewMixer(options ...MixerOption) (types.Mixer, error) {
 	}
 
 	return m, nil
-}
-
-func (m *Mixer) NewRouter() *Router {
-	r := &Router{}
-	m.initRouter(r)
-	return r
 }
 
 func (m *Mixer) newHandler(pattern string, h interface{}) (types.Handler, error) {

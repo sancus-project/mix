@@ -11,7 +11,7 @@ import (
 )
 
 // Middleware
-func (m *Router) middlewareTryServeHTTP(w http.ResponseWriter, r *http.Request, prefix string, path string) error {
+func (m *router) MiddlewareTryServeHTTP(w http.ResponseWriter, r *http.Request, prefix string, path string) error {
 
 	ctx := r.Context()
 	if ctx == nil {
@@ -29,21 +29,21 @@ func (m *Router) middlewareTryServeHTTP(w http.ResponseWriter, r *http.Request, 
 	return errors.ErrNotFound
 }
 
-func (m *Router) MiddlewareHandler(w http.ResponseWriter, r *http.Request, next http.Handler, prefix string) {
+func (m *router) MiddlewareHandler(w http.ResponseWriter, r *http.Request, next http.Handler, prefix string) {
 	var err error
 
 	path := m.mixer.config.GetRoutePath(r)
 
 	if prefix == "/" || prefix == "" {
 		// no prefix
-		err = m.middlewareTryServeHTTP(w, r, "", path)
+		err = m.MiddlewareTryServeHTTP(w, r, "", path)
 
 	} else if s := strings.TrimPrefix(path, prefix); s == path {
 		// doesn't match prefix
 		err = errors.ErrNotFound
 	} else if s == "" || s[0] == '/' {
 		// prefix match
-		err = m.middlewareTryServeHTTP(w, r, prefix, s)
+		err = m.MiddlewareTryServeHTTP(w, r, prefix, s)
 	} else {
 		// doesn't match prefix
 		err = errors.ErrNotFound
@@ -63,7 +63,7 @@ func (m *Router) MiddlewareHandler(w http.ResponseWriter, r *http.Request, next 
 	}
 }
 
-func (m *Router) Middleware(prefix string) web.MiddlewareHandlerFunc {
+func (m *router) Middleware(prefix string) web.MiddlewareHandlerFunc {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			if t := m.GetServerTiming(r, "Middleware"); t != nil {

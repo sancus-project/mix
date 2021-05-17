@@ -10,7 +10,7 @@ import (
 )
 
 // web.RouterPageInfo
-func (m *Router) PageInfo(r *http.Request) (interface{}, bool) {
+func (m *router) PageInfo(r *http.Request) (interface{}, bool) {
 	// Server-Timing
 	if t := m.GetServerTiming(r, "PageInfo"); t != nil {
 		defer t.Start().Stop()
@@ -35,7 +35,7 @@ func (m *Router) PageInfo(r *http.Request) (interface{}, bool) {
 }
 
 // web.Handler
-func (m *Router) tryServeHTTP(w http.ResponseWriter, r *http.Request) error {
+func (m *router) tryServeHTTP(w http.ResponseWriter, r *http.Request) error {
 
 	ctx := r.Context()
 	if ctx == nil {
@@ -53,7 +53,7 @@ func (m *Router) tryServeHTTP(w http.ResponseWriter, r *http.Request) error {
 	return errors.ErrNotFound
 }
 
-func (m *Router) TryServeHTTP(w http.ResponseWriter, r *http.Request) error {
+func (m *router) TryServeHTTP(w http.ResponseWriter, r *http.Request) error {
 	// Server-Timing
 	if t := m.GetServerTiming(r, "TryServeHTTP"); t != nil {
 		defer t.Start().Stop()
@@ -63,7 +63,7 @@ func (m *Router) TryServeHTTP(w http.ResponseWriter, r *http.Request) error {
 }
 
 // http.Handler
-func (m *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (m *router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Server-Timing
 	if t := m.GetServerTiming(r, "ServeHTTP"); t != nil {
 		defer t.Start().Stop()

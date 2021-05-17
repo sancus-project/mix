@@ -12,6 +12,38 @@ import (
 	"go.sancus.dev/mix/types"
 )
 
+type Router interface {
+	types.Router
+
+	Init(m *Mixer, servertiming string)
+	Mixer() *Mixer
+
+	RouteSegments(p []tree.Segment) Router
+	AttachHandler(w types.Handler) error
+}
+
+type router struct {
+	mixer   *Mixer
+	mu      sync.RWMutex
+	top     Router
+	handler []types.Handler
+
+	ServerTimingPrefix string
+}
+
+func (r *router) init(m *Mixer, top Router, servertiming string) {
+	r.mixer = m
+	r.top = top
+	r.ServerTimingPrefix = servertiming
+}
+
+func (r *router) Mixer() *Mixer {
+	if r != nil {
+		return r.mixer
+	}
+	return nil
+}
+
 // Expression based routers
 type RouterExp struct {
 	Keys   []tree.Segment
@@ -57,33 +89,41 @@ func (t *RouterExp) Get(key tree.Segment) (r types.Router, ok bool) {
 }
 
 // Router description at a specific segment
-type Router struct {
-	mixer *Mixer
-	mu    sync.RWMutex
+type RouterNode struct {
+	router
 
 	trie *radix.Tree
 	exps RouterExp
-
-	handler []types.Handler
-
-	ServerTimingPrefix string
 }
 
-func (m *Mixer) initRouter(r *Router) {
-	n := m.routerCount
-	m.routerCount++
+func newRouter(m *Mixer) Router {
+	r := &RouterNode{}
+	m.initRouter(r)
+	return r
+}
 
-	r.mixer = m
+func (r *RouterNode) Init(m *Mixer, servertiming string) {
+	r.router.init(m, r, servertiming)
+
 	r.trie = radix.New()
 	r.exps.trie = radix.New()
+}
+
+func (m *Mixer) initRouter(r Router) {
+	var servicetiming string
 
 	if len(m.config.ServerTiming) > 0 {
-		m.ServerTimingPrefix = fmt.Sprintf("%s-%v", m.config.ServerTiming, n)
+		n := m.routerCount
+		servicetiming = fmt.Sprintf("%s-%v", m.config.ServerTiming, n)
 	}
+
+	m.routerCount++
+
+	r.Init(m, servicetiming)
 }
 
 // Resolve
-func (m *Router) match(s string) ([]tree.Match, []types.Router, bool) {
+func (m *RouterNode) match(s string) ([]tree.Match, []types.Router, bool) {
 	var matches []tree.Match
 	var routers []types.Router
 
@@ -92,7 +132,7 @@ func (m *Router) match(s string) ([]tree.Match, []types.Router, bool) {
 
 	// Literal strings
 	if v, ok := m.trie.Get(s); ok {
-		if r, ok := v.(*Router); ok {
+		if r, ok := v.(Router); ok {
 			matches = append(matches, s)
 			routers = append(routers, r)
 		}
@@ -112,13 +152,14 @@ func (m *Router) match(s string) ([]tree.Match, []types.Router, bool) {
 }
 
 // Gets Router for a given path pattern
-func (m *Router) Route(pattern string, fn func(r types.Router)) types.Router {
+func (m *router) Route(pattern string, fn func(r types.Router)) types.Router {
+
 	p, err := tree.Compile(pattern)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	r := m.route(p)
+	r := m.routeSegments(p)
 	if r == nil {
 		return nil
 	}
@@ -130,26 +171,33 @@ func (m *Router) Route(pattern string, fn func(r types.Router)) types.Router {
 	return r
 }
 
-func (m *Router) route(p []tree.Segment) *Router {
-	var r *Router
+func (m *router) routeSegments(p []tree.Segment) Router {
+	if m != nil && m.top != nil {
+		return m.top.RouteSegments(p)
+	} else {
+		return nil
+	}
+}
+
+func (m *RouterNode) RouteSegments(p []tree.Segment) Router {
+	var r Router
 	var p0 tree.Segment
-	var s string
 
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
 	p0, p = p[0], p[1:]
-	s = p0.String()
 
 	if _, ok := p0.(tree.Literal); ok {
 		// literal string
+		s := p0.String()
 		v, ok := m.trie.Get(s)
 		if ok {
 			// reuse
-			r = v.(*Router)
+			r = v.(Router)
 		} else {
 			// new
-			r = m.mixer.NewRouter()
+			r = newRouter(m.mixer)
 			m.trie.Insert(s, r)
 		}
 	} else {
@@ -157,10 +205,10 @@ func (m *Router) route(p []tree.Segment) *Router {
 		v, ok := m.exps.Get(p0)
 		if ok {
 			// reuse
-			r = v.(*Router)
+			r = v.(Router)
 		} else {
 			// new
-			r = m.mixer.NewRouter()
+			r = newRouter(m.mixer)
 			m.exps.Append(p0, r)
 		}
 	}
@@ -168,12 +216,12 @@ func (m *Router) route(p []tree.Segment) *Router {
 	if len(p) == 0 {
 		return r
 	} else {
-		return r.route(p)
+		return r.RouteSegments(p)
 	}
 }
 
 // Mounts handler at path
-func (m *Router) Mount(path string, h interface{}) error {
+func (m *router) Mount(path string, h interface{}) error {
 	var pattern string
 
 	if path == "" {
@@ -189,25 +237,30 @@ func (m *Router) Mount(path string, h interface{}) error {
 		return err
 	}
 
+	r := m.routeSegments(p)
+	if r == nil {
+		return tree.InvalidPattern(pattern)
+	}
+
 	w, err := m.mixer.newHandler(pattern, h)
 	if err != nil {
 		return err
 	}
 
-	return m.route(p).attach(w)
+	return r.AttachHandler(w)
 }
 
 // Attach handler to Router
-func (m *Router) Attach(h interface{}) error {
+func (m *router) Attach(h interface{}) error {
 	w, err := m.mixer.newHandler("/", h)
 	if err != nil {
 		return err
 	}
 
-	return m.attach(w)
+	return m.AttachHandler(w)
 }
 
-func (m *Router) attach(w types.Handler) error {
+func (m *router) AttachHandler(w types.Handler) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
