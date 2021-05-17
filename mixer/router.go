@@ -44,6 +44,21 @@ func (r *router) Mixer() *Mixer {
 	return nil
 }
 
+// CatchAll
+type RouterCatchAll struct {
+	router
+}
+
+func newCatchAll(m *Mixer) Router {
+	r := &RouterCatchAll{}
+	m.initRouter(r)
+	return r
+}
+
+func (r *RouterCatchAll) Init(m *Mixer, servertiming string) {
+	r.router.init(m, r, servertiming)
+}
+
 // Expression based routers
 type RouterExp struct {
 	Keys   []tree.Segment
@@ -94,6 +109,8 @@ type RouterNode struct {
 
 	trie *radix.Tree
 	exps RouterExp
+
+	catchall Router
 }
 
 func newRouter(m *Mixer) Router {
@@ -120,35 +137,6 @@ func (m *Mixer) initRouter(r Router) {
 	m.routerCount++
 
 	r.Init(m, servicetiming)
-}
-
-// Resolve
-func (m *RouterNode) match(s string) ([]tree.Match, []types.Router, bool) {
-	var matches []tree.Match
-	var routers []types.Router
-
-	m.mu.RLock()
-	defer m.mu.RUnlock()
-
-	// Literal strings
-	if v, ok := m.trie.Get(s); ok {
-		if r, ok := v.(Router); ok {
-			matches = append(matches, s)
-			routers = append(routers, r)
-		}
-	}
-
-	// Expressions
-	if v, r, ok := m.exps.Match(s); ok {
-		matches = append(matches, v...)
-		routers = append(routers, r...)
-	}
-
-	if len(routers) > 0 {
-		return matches, routers, true
-	}
-
-	return nil, nil, false
 }
 
 // Gets Router for a given path pattern
@@ -188,7 +176,13 @@ func (m *RouterNode) RouteSegments(p []tree.Segment) Router {
 
 	p0, p = p[0], p[1:]
 
-	if _, ok := p0.(tree.Literal); ok {
+	if _, ok := p0.(tree.CatchAll); ok {
+		r = m.catchall
+		if r == nil {
+			r = newCatchAll(m.mixer)
+			m.catchall = r
+		}
+	} else if _, ok := p0.(tree.Literal); ok {
 		// literal string
 		s := p0.String()
 		v, ok := m.trie.Get(s)
@@ -218,6 +212,13 @@ func (m *RouterNode) RouteSegments(p []tree.Segment) Router {
 	} else {
 		return r.RouteSegments(p)
 	}
+}
+
+func (m *RouterCatchAll) RouteSegments(p []tree.Segment) Router {
+	if len(p) == 0 {
+		return m
+	}
+	return nil
 }
 
 // Mounts handler at path
