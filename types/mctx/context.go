@@ -41,6 +41,19 @@ func (rctx *Context) Init(ctx context.Context, prefix, path string) error {
 	return nil
 }
 
+func (rctx *Context) Path() string {
+	prefix := rctx.RoutePrefix
+	path := rctx.RoutePath
+
+	if prefix == "/" {
+		return path
+	} else if path == "" {
+		return prefix
+	} else {
+		return prefix + path
+	}
+}
+
 func (rctx *Context) Next() (*Context, string) {
 
 	path := rctx.RoutePath
