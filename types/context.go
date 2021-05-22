@@ -1,7 +1,7 @@
 package types
 
 import (
-	"go.sancus.dev/mix/types/mctx"
+	"go.sancus.dev/web/context"
 )
 
-type Context = mctx.Context
+type Context = context.Context

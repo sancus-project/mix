@@ -3,7 +3,7 @@ package mix
 import (
 	"context"
 
-	"go.sancus.dev/mix/types/mctx"
+	mctx "go.sancus.dev/web/context"
 )
 
 type Context = mctx.Context
@@ -17,5 +17,5 @@ func WithRouteContext(ctx context.Context, rctx *mctx.Context) context.Context {
 }
 
 func NewRouteContext(ctx context.Context, prefix, path string) *mctx.Context {
-	return mctx.NewRouteContext(ctx, prefix, path)
+	return mctx.NewRouteContext(prefix, path)
 }
