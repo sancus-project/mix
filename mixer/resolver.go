@@ -92,7 +92,8 @@ func resolve(matches []RouterMatch) (web.Handler, *mix.Context, bool) {
 	var wg sync.WaitGroup
 	var rr RouterResolver
 
-	for _, m := range matches {
+	for i, _ := range matches {
+		m := matches[i]
 
 		wg.Add(1)
 		go func() {
