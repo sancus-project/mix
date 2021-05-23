@@ -1,8 +1,8 @@
 package mixer
 
 import (
+	"bytes"
 	"context"
-	"log"
 	"net/http"
 	"sync"
 
@@ -21,18 +21,28 @@ type RouterResolver struct {
 	rctx *mix.Context
 }
 
+func (rr *RouterResolver) NewRequest(rctx *mix.Context, method string) *http.Request {
+	var buf bytes.Buffer
+
+	ctx := context.Background()
+	ctx = mix.WithRouteContext(ctx, rctx)
+
+	url := rctx.Path()
+	req, err := http.NewRequestWithContext(ctx, method, url, &buf)
+	if err != nil {
+		panic(err)
+	}
+	return req
+}
+
 func (rr *RouterResolver) Report(h web.Handler, rctx *mix.Context) {
 	rr.mu.Lock()
 	defer rr.mu.Unlock()
 
 	if !rr.closed {
-		log.Printf("%s:%s h:%#v rctx:%#v", "Report", "", h, rctx)
-
 		rr.h = h
 		rr.rctx = rctx
 		rr.closed = true
-	} else {
-		log.Printf("%s:%s h:%#v rctx:%#v", "Report", "<CLOSED>", h, rctx)
 	}
 }
 
@@ -45,7 +55,6 @@ func (rr *RouterResolver) Result() (web.Handler, *mix.Context, bool) {
 	}
 
 	if rr.h != nil {
-		log.Printf("%s:%s h:%#v rctx:%#v", "Result", "", rr.h, rr.rctx)
 		return rr.h, rr.rctx, true
 	}
 
@@ -59,16 +68,23 @@ type RouterMatch struct {
 }
 
 func (v *RouterMatch) Resolve(rr *RouterResolver) {
-	log.Printf("%T.%s: m:%#v h:%T ctx:%#v", v, "Resolve", v.m, v.h, v.rctx)
+	if m, ok := v.h.(Router); !ok {
+		// types.Handler
 
-	if r, ok := v.h.(Router); ok {
-		// Router
-		if h, rctx, ok := r.Resolve(v.rctx); ok {
-			rr.Report(h, rctx)
+		req := rr.NewRequest(v.rctx, "HEAD")
+		if p, ok := v.h.PageInfo(req); ok {
+
+			// Page found, did we get a direct handler?
+			if h, ok := p.(web.Handler); ok {
+				rr.Report(h, v.rctx)
+			} else {
+				rr.Report(v.h, v.rctx)
+			}
 		}
-	} else {
-		// Handler
-		rr.Report(v.h, v.rctx)
+
+	} else if h, rctx, ok := m.Resolve(v.rctx); ok {
+		// Handler Validated by another Router
+		rr.Report(h, rctx)
 	}
 }
 
@@ -77,6 +93,7 @@ func resolve(matches []RouterMatch) (web.Handler, *mix.Context, bool) {
 	var rr RouterResolver
 
 	for _, m := range matches {
+
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
@@ -126,7 +143,6 @@ func (m *RouterNode) Resolve(rctx *mix.Context) (web.Handler, *mix.Context, bool
 	var matches []RouterMatch
 
 	path := rctx.RoutePath
-	log.Printf("%T.%s: path:%q % #v", m, "Resolve", path, rctx)
 
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -166,9 +182,6 @@ func (m *RouterNode) Resolve(rctx *mix.Context) (web.Handler, *mix.Context, bool
 
 func (m *RouterCatchAll) Resolve(rctx *mix.Context) (web.Handler, *mix.Context, bool) {
 	var matches []RouterMatch
-
-	path := rctx.RoutePath
-	log.Printf("%T.%s: path:%q % #v", m, "Resolve", path, rctx)
 
 	m.mu.Lock()
 	defer m.mu.Unlock()
