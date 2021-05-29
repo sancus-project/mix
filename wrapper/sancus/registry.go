@@ -16,7 +16,7 @@ func (_ WrapperConstructor) Priority() int {
 }
 
 func (f *WrapperConstructor) New(pattern string, h interface{}) (types.Handler, bool) {
-	if v, ok := h.(Handler); ok {
+	if v, ok := h.(types.Handler); ok {
 		return v, true
 	}
 	return nil, false
