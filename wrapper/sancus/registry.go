@@ -1,4 +1,4 @@
-package chi
+package sancus
 
 import (
 	"log"
