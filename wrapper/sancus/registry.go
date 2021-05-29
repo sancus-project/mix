@@ -5,6 +5,7 @@ import (
 
 	"go.sancus.dev/mix/types"
 	"go.sancus.dev/mix/wrapper/registry"
+	"go.sancus.dev/web"
 )
 
 const ConstructorPriority = 9
@@ -18,6 +19,9 @@ func (_ WrapperConstructor) Priority() int {
 func (f *WrapperConstructor) New(pattern string, h interface{}) (types.Handler, bool) {
 	if v, ok := h.(types.Handler); ok {
 		return v, true
+	} else if v, ok := h.(web.Handler); ok {
+		r := &Wrapper{Handler: v}
+		return r, true
 	}
 	return nil, false
 }
